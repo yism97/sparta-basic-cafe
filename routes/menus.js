@@ -64,7 +64,7 @@ router.get("/", async (req, res) => {
     }));
 
     // 배열 형식으로 응답 보내기
-    res.status(200).json({ message: "메뉴 조회 완료!", menus: menus });
+    res.status(200).json({ message: "모든 메뉴 조회 완료!", menus: menus });
   } catch (error) {
     res.status(400).json({ message: "메뉴 조회 실패." });
   }
@@ -94,29 +94,48 @@ router.get("/", async (req, res) => {
   });
 }); */
 
+// 특정 메뉴 조회
+router.get("/:menuId", async (req, res) => {
+  try {
+    const id = req.params.menuId;
+    const menus = await prisma.menu.findFirst({
+      where: {
+        id: +id,
+      },
+    });
+
+    // 배열 형식으로 응답 보내기
+    res.status(200).json({ message: `${id}번 메뉴 조회 완료!`, menus });
+  } catch (error) {
+    res.status(400).json({ message: "메뉴 조회 실패." });
+  }
+});
+
 // 메뉴 생성
 router.post("/", async (req, res) => {
   try {
     const { name, type, temperature, price } = req.body;
+    const floatPrice = parseInt(price);
     const menu = await prisma.menu.create({
       data: {
         name,
         type,
         temperature,
-        price,
+        price: floatPrice,
       },
     });
-    res.status(200).json({ message: "메뉴 생성 완료!", menu });
+    res.status(201).json({ message: "메뉴 생성 완료!", menu });
   } catch (error) {
     res.status(400).json({ message: "메뉴 생성 실패." });
   }
 });
 
-// 메뉴 수정(patch이용)
-router.patch("/:id", async (req, res) => {
+// 메뉴 수정
+router.put("/:menuId", async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.menuId;
     const { name, type, temperature, price } = req.body;
+    const floatPrice = parseInt(price);
 
     const menu = await prisma.menu.update({
       where: {
@@ -126,20 +145,20 @@ router.patch("/:id", async (req, res) => {
         name,
         type,
         temperature,
-        price,
+        price: floatPrice,
       },
     });
 
-    res.status(200).json({ message: "메뉴 수정 완료!", menu });
+    res.status(200).json({ message: `${id}번 메뉴가 수정되었습니다.`, menu });
   } catch (error) {
     res.status(400).json({ message: "메뉴 수정 실패." });
   }
 });
 
 // 메뉴 삭제
-router.delete("/:id", async (req, res) => {
+router.delete("/:menuId", async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.menuId;
 
     const menu = await prisma.menu.delete({
       where: {
@@ -147,7 +166,7 @@ router.delete("/:id", async (req, res) => {
       },
     });
 
-    res.status(200).json({ message: "메뉴 삭제 완료!", menu });
+    res.status(200).json({ message: `${id}번 메뉴가 삭제되었습니다.`, menu });
   } catch (error) {
     res.status(400).json({ message: "메뉴 삭제 실패." });
   }
